@@ -1,0 +1,2 @@
+#! /bin/sh
+"/usr/local/Cellar/p7zip/9.20.1/lib/p7zip/7z" "$@"
