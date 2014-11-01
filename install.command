@@ -43,28 +43,28 @@ rm -rf "3DR_Anthology-1.0/Duke Nukem - Manhattan Project"
 
 echo "Generating OSX launchers:"
 
-dosboxescaped=$(echo "$dosbox" | sed -e 's/\//\\\//g')
-for d in 3DR_Anthology-1.0/*.bat; do		
+for d in 3DR_Anthology-1.0/*.bat; do
 	# extract the name and directory from the bat file
 	prettyname=$(echo $d | sed -e 's/\.bat//g' | sed -e 's/3DR_Anthology-1.0\///g')
 	winconf=$(cat "$d" | grep "conf" | sed 's/.*\.\.\\//' | sed 's/\".*//' )
 	windir=$(cat "$d" | grep "cd" | sed -e 's/cd //g' | sed -e 's/\\dosbox//g' | sed -e 's/\\Dosbox//g' | sed -e 's/\"//g' | tr -d '\r')
 	# the windows dir is case insensitive, and someone at 3drealms didn't care to check the dir names
 	# find the case sensitive folder name	
-	reldir=$(find 3DR_Anthology-1.0 -type d -maxdepth 1 | grep -i "$windir")
-	dir="$DIR/$reldir"
-	conf="$DIR/$(find 3DR_Anthology-1.0 -type f -maxdepth 2 | grep -i "$reldir/$winconf")"
+	dir=$(find 3DR_Anthology-1.0 -type d -maxdepth 1 | grep -i "$windir" | sed -e 's/3DR_Anthology-1.0\///g' )	
+	conf=$(find 3DR_Anthology-1.0 -type f -maxdepth 2 | grep -i "$reldir/$winconf" | sed -e 's/3DR_Anthology-1.0\/'"$dir"'\///g' )
 
 	# Create launchers
 	launcher="3DR_Anthology-1.0/$prettyname.command"	
 	echo "#!/usr/bin/env bash" > "$launcher"
+	echo "# cd to script folder" >> "$launcher"
+	echo "cd \"\$( dirname \"\${BASH_SOURCE[0]}\" )\" && pwd" >> "$launcher"
 	echo "# Generate tmp subdir to support dosbox relative config file locaiton loading" >> "$launcher"
 	echo "mkdir \"$dir/tmp\"" >> "$launcher"
 	echo "cd \"$dir/tmp\"" >> "$launcher"
-	echo "\"$dosbox\" -conf \"$conf\" -noconsole -c &" >> "$launcher"
+	echo "\"$dosbox\" -conf \"../$conf\" -noconsole -c &" >> "$launcher"
 	echo "cd .." >> "$launcher"
 	echo "rmdir tmp" >> "$launcher"
-	echo "osascript -e 'tell application \"Terminal\" to close (every window whose name contains \".command\")' &" >> "$launcher"
+	echo "osascript -e 'tell application \"Terminal\" to close (every window whose name contains \"$prettyname.command\")' &" >> "$launcher"
 	echo "exit" >> "$launcher"
 	
 	chmod +x "$launcher"
@@ -74,5 +74,8 @@ done
 
 echo "Removing Windows launchers"
 rm 3DR_Anthology-1.0/*.bat
+
+echo "Moving final folder"
+mv 3DR_Anthology-1.0 "3D Realms Anthology OSX"
 
 echo "All done. Double click a .command file to start game!"
