@@ -75,7 +75,4 @@ done
 echo "Removing Windows launchers"
 rm 3DR_Anthology-1.0/*.bat
 
-echo "Renaming final folder"
-mv 3DR_Anthology-1.0 "3DRealms Anthology OSX"
-
 echo "All done. Double click a .command file to start game!"
